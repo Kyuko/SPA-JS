@@ -37,11 +37,113 @@ function RenderAboutPage() {
         <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry...</p>`; 
 } 
  
-function RenderContactPage() {      
-    document.querySelector('main').innerHTML = ` 
-        <h1 class="title">Contact with me</h1> 
-        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry...</p>`; 
-} 
+function RenderContactPage() {
+    document.querySelector('main').innerHTML = `
+        <h1 class="title">Contact Me</h1>
+        <form id="contact-form">
+            <div class="form-group">
+                <label for="name">Imię:</label>
+                <input type="text" id="name" name="name" required>
+                <span class="error" id="name-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+                <span class="error" id="email-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="message">Wiadomość:</label>
+                <textarea id="message" name="message" required></textarea>
+                <span class="error" id="message-error"></span>
+            </div>
+
+            <!-- CAPTCHA -->
+            <div class="form-group">
+                <label for="captcha">Solve this: <span id="captcha-question"></span></label>
+                <input type="number" id="captcha" name="captcha" required>
+                <span class="error" id="captcha-error"></span>
+            </div>
+
+            <button type="submit">Send</button>
+        </form>
+    `;
+
+    initializeContactForm();
+}
+
+function initializeContactForm() {
+    const form = document.getElementById('contact-form');
+    const captchaQuestion = document.getElementById('captcha-question');
+
+    // Generate a basic math CAPTCHA
+    const captcha = generateCaptcha();
+    captchaQuestion.textContent = `${captcha.num1} + ${captcha.num2}`;
+    const captchaSolution = captcha.solution;
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        // Clear previous errors
+        clearErrors();
+
+        // Form input values
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const message = document.getElementById('message').value.trim();
+        const captchaInput = document.getElementById('captcha').value.trim();
+
+        let isValid = true;
+
+        // Validation checks
+        if (name === "") {
+            displayError('name-error', "Name is required.");
+            isValid = false;
+        }
+
+        if (!validateEmail(email)) {
+            displayError('email-error', "Please enter a valid email address.");
+            isValid = false;
+        }
+
+        if (message === "") {
+            displayError('message-error', "Message cannot be empty.");
+            isValid = false;
+        }
+
+        if (captchaInput === "" || parseInt(captchaInput) !== captchaSolution) {
+            displayError('captcha-error', "CAPTCHA is incorrect.");
+            isValid = false;
+        }
+
+        if (isValid) {
+            alert("Form submitted successfully!");
+            form.reset(); // Reset the form
+            // Optionally send form data to a server here
+        }
+    });
+}
+
+function generateCaptcha() {
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    return { num1, num2, solution: num1 + num2 };
+}
+
+function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+function displayError(elementId, message) {
+    document.getElementById(elementId).textContent = message;
+}
+
+function clearErrors() {
+    const errorElements = document.querySelectorAll('.error');
+    errorElements.forEach(el => el.textContent = "");
+}
  
 function RenderGalleryPage() {
     document.querySelector('main').innerHTML = `

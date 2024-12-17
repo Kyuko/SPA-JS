@@ -67,6 +67,8 @@ function LoadGalleryImages() {
         img.alt = `Gallery Image ${index + 1}`;
         img.classList.add('lazy');
 
+        img.addEventListener('click', () => openModal(url, img.alt)); // Add click event to open modal
+
         imgContainer.appendChild(img);
         gallery.appendChild(imgContainer);
     });
@@ -101,6 +103,27 @@ async function fetchImageAsBlob(url) {
         console.error('Image load failed:', error);
         return ''; // Empty fallback
     }
+}
+
+// Modal functionality
+function openModal(imageSrc, imageAlt) {
+    const modal = document.getElementById('image-modal');
+    const modalImage = document.getElementById('modal-image');
+    const captionText = document.getElementById('caption');
+
+    modal.style.display = "block";
+    modalImage.src = imageSrc;
+    captionText.innerHTML = imageAlt;
+
+    // Close modal on clicking the "X" or outside
+    const closeModal = document.querySelector('.close-modal');
+    closeModal.onclick = () => modal.style.display = "none";
+
+    modal.onclick = (event) => {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    };
 }
 
 function popStateHandler() {  

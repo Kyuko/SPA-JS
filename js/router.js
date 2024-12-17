@@ -51,53 +51,38 @@ function RenderGalleryPage() {
     LoadGalleryImages();
 }
 
-async function LoadGalleryImages() {
+function LoadGalleryImages() {
     const gallery = document.querySelector('#gallery');
-
-    // Assume images are named sequentially as image1.jpg, image2.jpg, etc.
     const imageCount = 9; // Total 9 images for 3x3 grid
+
     const imageUrls = Array.from({ length: imageCount }, (_, i) => `images/image${i + 1}.jpg`);
 
+    // Add placeholders for lazy images
     imageUrls.forEach((url, index) => {
         const imgContainer = document.createElement('div');
         imgContainer.classList.add('image-container');
-        
+
         const img = document.createElement('img');
+        img.dataset.src = url; // Store the image path in data-src
         img.alt = `Gallery Image ${index + 1}`;
         img.classList.add('lazy');
 
         imgContainer.appendChild(img);
         gallery.appendChild(imgContainer);
-
-        // Fetch and load the image asynchronously as a Blob
-        loadImageAsBlob(url, img);
     });
-}
 
-async function loadImageAsBlob(url, imgElement) {
-    try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Failed to load ${url}`);
-        
-        const blob = await response.blob();
-        const objectURL = URL.createObjectURL(blob);
-
-        imgElement.src = objectURL; // Assign Blob URL to the img element
-        imgElement.classList.remove('lazy');
-    } catch (error) {
-        console.error("Error loading image:", error);
-        imgElement.alt = "Image failed to load";
-    }
+    observeLazyImages();
 }
 
 function observeLazyImages() {
     const lazyImages = document.querySelectorAll('.lazy');
     const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
+        entries.forEach(async (entry) => {
             if (entry.isIntersecting) {
                 const img = entry.target;
-                img.src = img.dataset.src; // Replace with actual src
-                img.classList.remove('lazy');
+                const blobURL = await fetchImageAsBlob(img.dataset.src);
+                img.src = blobURL; // Set the image src to the Blob URL
+                img.classList.remove('lazy'); // Remove lazy class
                 observer.unobserve(img);
             }
         });
@@ -106,6 +91,17 @@ function observeLazyImages() {
     lazyImages.forEach(img => observer.observe(img));
 }
 
+async function fetchImageAsBlob(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Failed to load ${url}`);
+        const blob = await response.blob();
+        return URL.createObjectURL(blob);
+    } catch (error) {
+        console.error('Image load failed:', error);
+        return ''; // Empty fallback
+    }
+}
 
 function popStateHandler() {  
     let loc = window.location.href.toString().split(window.location.host)[1];  

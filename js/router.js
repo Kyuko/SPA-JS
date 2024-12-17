@@ -47,6 +47,11 @@ function RenderGalleryPage() {
     document.querySelector('main').innerHTML = `
         <h1 class="title">Gallery</h1>
         <div id="gallery" class="gallery-container"></div>
+ <      <div id="image-modal" class="modal">
+            <span class="close-modal">&times;</span>
+            <img class="modal-content" id="modal-image">
+            <div id="caption"></div>
+        </div>
     `;
     LoadGalleryImages();
 }
